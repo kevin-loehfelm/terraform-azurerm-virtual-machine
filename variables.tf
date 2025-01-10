@@ -29,19 +29,7 @@ variable "tags" {
   description = "custom tags"
 }
 
-variable "image_name" {
+variable "vm_image_id" {
   type        = string
-  description = "hcp packer bucket (image name)"
-}
-
-variable "image_channel" {
-  type        = string
-  description = "hcp packer channel"
-  default     = "prod"
-}
-
-variable "hcp_project" {
-  type        = string
-  description = "hcp project id"
-  default     = "e22399dc-b1ac-477f-b8f7-c5b4c9dfa538"
+  description = "azure virtual machine image identifier"
 }

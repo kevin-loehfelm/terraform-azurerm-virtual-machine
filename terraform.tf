@@ -5,9 +5,5 @@ terraform {
     azurerm = {
       source = "hashicorp/azurerm"
     }
-    # tflint-ignore: terraform_required_providers
-    hcp = {
-      source = "hashicorp/hcp"
-    }
   }
 }

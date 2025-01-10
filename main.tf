@@ -16,14 +16,6 @@ resource "azurerm_network_interface" "this" {
   )
 }
 
-
-data "hcp_packer_artifact" "this" {
-  bucket_name  = var.image_name
-  channel_name = var.image_channel
-  platform     = "azure"
-  region       = var.location
-}
-
 resource "azurerm_virtual_machine" "this" {
   name                          = var.name
   location                      = var.location
@@ -46,7 +38,7 @@ resource "azurerm_virtual_machine" "this" {
   }
 
   storage_image_reference {
-    id = data.hcp_packer_artifact.this.external_identifier
+    id = var.vm_image_id
   }
 
   os_profile {
