@@ -16,33 +16,48 @@ resource "azurerm_network_interface" "this" {
   )
 }
 
-# resource: virtual machine
-resource "azurerm_windows_virtual_machine" "this" {
-  name                              = var.name
-  computer_name                     = var.name
-  admin_username                    = "azureuser"
-  admin_password                    = "P@ssw0rd!"
-  location                          = var.location
-  resource_group_name               = var.resource_group_name
-  network_interface_ids             = [azurerm_network_interface.this.id]
-  size                              = var.vm_size
-  vm_agent_platform_updates_enabled = true
 
-  os_disk {
-    name                 = "${var.name}-os-disk"
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-  source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2022-datacenter-azure-edition"
-    version   = "latest"
-  }
+data "hcp_packer_artifact" "this" {
+  bucket_name  = var.image_name
+  channel_name = var.image_channel
+  platform     = "azure"
+  region       = var.location
+}
+
+resource "azurerm_virtual_machine" "this" {
+  name                          = var.name
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  network_interface_ids         = [azurerm_network_interface.this.id]
+  vm_size                       = var.vm_size
+  delete_os_disk_on_termination = true
   tags = merge(
     {
-      resourceType = "Viertual Machine"
+      resourceType = "Virtual Machine"
     },
     var.tags
   )
+
+  storage_os_disk {
+    name              = "${var.name}-os-disk"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+
+  storage_image_reference {
+    id = data.hcp_packer_artifact.this.external_identifier
+  }
+
+  os_profile {
+    computer_name  = var.name
+    admin_username = "opsadmin"
+    admin_password = "Password1234!"
+  }
+
+  os_profile_windows_config {}
+
+  lifecycle {
+    create_before_destroy = false
+  }
 }
